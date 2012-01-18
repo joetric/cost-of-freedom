@@ -1,0 +1,21 @@
+from django.db import models
+
+class Places():
+    state = TextField(blank=True, default='')
+    vid_req = TextField(blank=True, default='')
+    bc_req = TextField(blank=True, default='')
+    county = TextField(blank=True, default='')
+    vid_agency = TextField(blank=True, default='')
+    vid_loc = TextField(blank=True, default='')
+    vid_hours = TextField(blank=True, default='')
+    vid_phone = TextField(blank=True, default='')
+    bc_mail_inst= TextField(blank=True, default='')
+    bc_online_inst = TextField(blank=True, default='')
+    bc_in_person_agency = TextField(blank=True, default='')
+    bc_in_person_cost = TextField(blank=True, default='')
+    bc_in_person_loc = TextField(blank=True, default='')
+    bc_in_person_hours = TextField(blank=True, default='')
+    bc_in_person_phone = TextField(blank=True, default='')
+
+    def __unicode__(self):
+        return '%d %s %s' % (self.id, self.state, self.county)
