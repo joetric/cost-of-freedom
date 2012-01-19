@@ -1,0 +1,4 @@
+South==0.7.3
+distribute==0.6.19
+ipython==0.12
+wsgiref==0.1.2
