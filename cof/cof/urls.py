@@ -6,6 +6,10 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'voterid.views.index'),
+    url(r'^api/?$', 'voterid.views.api'),
+    url(r'^api/(.{2})/?$', 'voterid.views.api'),
+    url(r'^api/(.+)/Co/(.{2})/?$', 'voterid.views.api'),
+    url(r'^api/(.+)/County/(.{2})/?$', 'voterid.views.api'),
     # Examples:
     # url(r'^$', 'cof.views.home', name='home'),
     # url(r'^cof/', include('cof.foo.urls')),
