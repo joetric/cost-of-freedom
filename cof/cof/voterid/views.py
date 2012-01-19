@@ -58,7 +58,7 @@ def index(request, county_or_state=None, state=None):
     else: 
         msg = 'Voter ID Requirements for %s County, %s' % (county, state)
 
-    return render_to_response("vid_req.html", {"message": msg,})
+    return render_to_response("vid_req.html", {"message":msg, "county":county, "state":state,})
 
 def api(request, county_or_state=None, state=None):
     # determine county and state

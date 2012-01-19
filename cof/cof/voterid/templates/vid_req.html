@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>{{ message }}</title>
-            <!--<link rel="stylesheet" href="/css/main.css" type="text/css"/>-->
+            <link rel="stylesheet" href="/static/css/main.css" type="text/css"/>
             <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
             <script type="text/javascript" src="/static/libraries/OpenLayers-2.11/OpenLayers.js"></script>
             <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.5"></script>
@@ -10,13 +10,13 @@
 
             var map;
 
-            $( function() {
+            $(function() {
 	            // easy function to zoom and center the map with the WGS 84 spatial reference system
-               var zoomAndCenter = function(map, lat, lon, zoomLevel) {
-               map.setCenter(
+                var zoomAndCenter = function(map, lat, lon, zoomLevel) {
+                map.setCenter(
                         wgs84toMapProj(new OpenLayers.LonLat(lon,lat)), zoomLevel
                     );
-               }         	
+                }         	
 	
 	            map = new OpenLayers.Map('map');
 	
@@ -26,23 +26,22 @@
 	            }
 	
 	            // OSM layer sources from MapQuest
-               arrayOSM = ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
+                arrayOSM = ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
                              "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
                              "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
                              "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"];
-               arrayAerial = ["http://oatile1.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.png",
+                arrayAerial = ["http://oatile1.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.png",
                               "http://oatile2.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.png",
                               "http://oatile3.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.png",
                               "http://oatile4.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.png"];
                
-               // define layers
-               var baseOSM = new OpenLayers.Layer.OSM("MapQuest-OSM Tiles", arrayOSM);
-               var baseAerial = new OpenLayers.Layer.OSM("MapQuest Open Aerial Tiles", arrayAerial);                  
+                // define layers
+                var baseOSM = new OpenLayers.Layer.OSM("MapQuest-OSM Tiles", arrayOSM);
+                var baseAerial = new OpenLayers.Layer.OSM("MapQuest Open Aerial Tiles", arrayAerial);                  
 	
 	            // add layers and controls
 	            map.addLayers([baseOSM, baseAerial]);
 	            map.addControl(new OpenLayers.Control.LayerSwitcher());
-	
 	
 	            // set default map layout
 	            zoomAndCenter(map, 40,-100,4);
@@ -61,6 +60,24 @@
 	            var geocode = function(address) {
 		            geocoder.addressToLocations({SingleLine:address, Country:'US'}, ["Loc_name", "State"], gcCallback)
 	            }
+
+                var get_api_endpoint = function() {
+                    if('{{county}}' != '') {
+                        return '/api/{{county}}/County/{{state}}';
+                    } else {
+                        return '/api/{{state}}';    
+                    }
+                } //endf
+
+                var display_info = function() {
+                    $.getJSON(get_api_endpoint(), function(data){
+                        $('#vid-req').text(data.results.vid_req);
+                        $('#bc-req').text(data.results.bc_req);
+                        $('#bc-online-inst').text(data.results.bc_online_inst);
+                        $('#bc-mail-inst').text(data.results.bc_mail_inst);
+                        $('#bc-in-person-cost').text(data.results.bc_in_person_cost);
+                    });
+                }
 	
 	            /* callback for the geocoder */
 	            var gcCallback = function(candidates) {
@@ -69,50 +86,9 @@
 			            +' ('+candidates[0]['location']['y'] //lat
 			            +', '+candidates[0]['location']['x'] //lon
 			            +')');
-			
-		            // fill in state
-		            var stateAbbr = candidates[0]['attributes']['State'] // 2-char state abbreviation
-		
-		            // search and display voter requirements
-		            $.getJSON('/index.php/api/voter_id_docs/'+stateAbbr, function(data){
-			            numDocs = data.documents.length;
-			            if(numDocs > 0) {
-				            // create list of documents
-				            $('#vote-req-header').text('To vote in '+stateAbbr+', you will need one of these:');
-				            $('#vote-req-content').html('<ul/>');
-				            for(x in data.documents) {
-					            $('#vote-req-content ul').append('<li>'+data.documents[x]+'</li>');
-				            }
-				
-				            $('#vote-id-header').text('How to get a voter ID in '+stateAbbr+':');
-				
-				            // get JSON from BC api
-				            $.getJSON('/index.php/api/birth_certificate/'+stateAbbr, function(bc_data){
-						            if(bc_data.length>0){	
-							            $('#vote-id-content').html('Please visit <a target="_blank" href="'+bc_data[0].url_photo_id+'">'+bc_data[0].url_photo_id+'</a> for more information.');
-							            $('#bc-header').text('Getting a birth certificate in '+stateAbbr+':');
-							            $('#bc-content').show();
-							            $('#bc-cost span').text(bc_data[0].cost_bc);
-							            // $('#bc-cost span').text(bc_data.cost_bc);
-						            }else{
-							            $('#vote-id-content').text('Information not yet available.');
-						            }
-					            });				
-				
-				            // voter id
 
-				
-			            } else {
-				            // display notice
-				            $('#vote-req-header').text('Sorry, this information is not yet available for '+stateAbbr+'.');
-			            }
-			
-			            });
-		
-		
-		
 		            // zoom map to location
-		            zoomAndCenter(map, candidates[0]['location']['y'], candidates[0]['location']['x'], 16);
+		            zoomAndCenter(map, candidates[0]['location']['y'], candidates[0]['location']['x'], 9);
 		
 		            // mark user's address
 		            var size = new OpenLayers.Size(21,25);
@@ -122,18 +98,53 @@
 
 		            // add markers for places to get documentation
 		
-	            }
+	            } //end geocoder callback
 	
 	            $('#address-form').submit( function() {
 		            geocode($.trim($('#address').val())); // geocode using the address the user entered
 		            return false; // prevent form from sending HTTP request
 	            });
-	
+
+                display_info();
+
+                /*
+                if('{{county}}' != '') {
+                    geocode('{{county}} {{state}}');
+                } else {
+                    geocode('{{state}}');;
+	            }
+                */
             });
 
             </script>
     </head>
     <body>
         <h1>{{ message }}</h1>
+        <h3 id="vid-req-head">Requirements to obtain a voter ID:</h3>
+        <p id="vid-req"></p>
+        <h3 id="bc-req-head">Requirements to obtain a birth certificate:</h3>
+        <p id="bc-req"></p>
+        <h3 id="bc-mail-inst-head">Birth certificate by mail:</h3>
+        <p id="bc-mail-inst"></p>
+        <h3 id="bc-online-inst-head">Birth certificate online:</h3>
+        <p id="bc-online-inst"></p>
+        <h3 id="bc-in-person-head">Birth certificate in person:</h3>
+        <p >Cost: <span id="bc-in-person-cost"></span></p>
+        <!--
+        <h3 id="map-directions">Click your location on the map, or type in your address:</h3>
+        <form id="address-form">
+            <p>
+                <input id="address" name="address" type="search" placeholder="Ex: 501 Auburn Avenue NE, Atlanta, GA" style="width:300px;"/>
+                <input type="submit" name="submit-address" id="submit-address" value="Search" />
+            </p>
+        </form>        
+        -->
+        <div id="map"></div>
+        <div class="footer">
+        <p class="smaller"><br />
+        Built at RHoK Global Philadelphia 2011. Check out our project on <a href="#">GitHub</a>.<br />
+        Data provided by the <a href="http://866ourvote.org/">Lawyers' Committee for Civil Rights Under Law</a>. <br />
+        Map built with <a href="http://openlayers.org/">OpenLayers</a> and powered by <a href="http://mapquest.com">MapQuest</a>. Geocoding by <a href="http://esri.com/">Esri</a>.
+        </div>
     </body>
 </html>
