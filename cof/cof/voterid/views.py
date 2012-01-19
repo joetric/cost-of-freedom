@@ -57,6 +57,7 @@ def api(request, county_or_state=None, state=None):
         'bc_req': _get_req('bc_req', county, state),
         'bc_mail_inst': _get_req('bc_mail_inst', county, state),
         'bc_online_inst': _get_req('bc_online_inst', county, state),
+        'bc_in_person_cost': _get_req('bc_in_person_cost', county, state),
         'bc_locations': _get_loc('bc_in_person', county, state),
         }
     }
