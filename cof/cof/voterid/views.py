@@ -1,5 +1,5 @@
 # Create your views here.
-#from django.core import serializers
+from django.core import serializers
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 import json
@@ -23,8 +23,13 @@ def _get_req(field, county, state):
 def _get_loc(placetype, county, state):
     """Takes bc_in_person or vid as placetype."""
     # county places first
+    exclude_kwargs = {'%s_loc' % placetype: ''}
+    loc = Place.objects.filter(county=county, state=state).exclude(**exclude_kwargs)
+    loc_dict = serializers.serialize('python', loc)
     # statewide places second
-    pass
+    loc = Place.objects.filter(county='', state=state).exclude(**exclude_kwargs)
+    loc_dict += serializers.serialize('python', loc)
+    return loc_dict
 
 def api(request, county_or_state=None, state=None):
     # determine county and state
@@ -40,11 +45,11 @@ def api(request, county_or_state=None, state=None):
         'county': county,
         'state': state,  
         'vid_req': _get_req('vid_req', county, state),
-        'vid_locations': None,
+        'vid_locations': _get_loc('vid', county, state),
         'bc_req': _get_req('bc_req', county, state),
         'bc_mail_inst': _get_req('bc_mail_inst', county, state),
         'bc_online_inst': _get_req('bc_online_inst', county, state),
-        'bc_locations': None,
+        'bc_locations': _get_loc('bc', county, state),
         }
     }
 
