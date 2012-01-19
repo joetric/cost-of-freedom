@@ -52,14 +52,13 @@ def index(request, county_or_state=None, state=None):
     county, state = _get_county_state(county_or_state, state)
     if county is None and state is None:
         msg = 'Select your state to see voter ID requirements.'
+        return render_to_response("pick_state.html", {"message": msg,})
     elif county is None:
         msg = 'Voter ID Requirements for %s' % state
     else: 
         msg = 'Voter ID Requirements for %s County, %s' % (county, state)
-        
-    return render_to_response("index.html", {
-	"message": msg,
-    })
+
+    return render_to_response("vid_req.html", {"message": msg,})
 
 def api(request, county_or_state=None, state=None):
     # determine county and state
