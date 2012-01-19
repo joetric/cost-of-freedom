@@ -6,6 +6,10 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'voterid.views.index'),
+    url(r'^([^/]{2})/?$', 'voterid.views.index'),
+    url(r'^([^/]+)/Co/(.{2})/?$', 'voterid.views.index'),
+    url(r'^([^/]+)/County/(.{2})/?$', 'voterid.views.index'),
+
     url(r'^api/?$', 'voterid.views.api'),
     url(r'^api/(.{2})/?$', 'voterid.views.api'),
     url(r'^api/(.+)/Co/(.{2})/?$', 'voterid.views.api'),

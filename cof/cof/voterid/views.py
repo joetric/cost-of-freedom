@@ -5,10 +5,15 @@ from django.http import HttpResponse
 import json
 from models import Place
 
-def index(request):
-    return render_to_response("index.html", {
-	"message": "Welcome to the Cost of Freedom App.",
-    })
+def _get_county_state(county_or_state, state):
+    county = None    
+    if county_or_state is not None:
+        if state is None:
+            state = county_or_state
+        else:
+            county = county_or_state
+        county_or_state = None
+    return county, state
 
 def _get_req(field, county, state):
     """Return a string of requirements to get a document."""
@@ -39,15 +44,14 @@ def _get_loc(placetype, county, state):
     loc_dict += _get_loc_dict(loc)
     return loc_dict
 
+def index(request, county_or_state=None, state=None):
+    return render_to_response("index.html", {
+	"message": "Welcome to the Cost of Freedom App.",
+    })
+
 def api(request, county_or_state=None, state=None):
     # determine county and state
-    county = None    
-    if county_or_state is not None:
-        if state is None:
-            state = county_or_state
-        else:
-            county = county_or_state
-        county_or_state = None
+    county, state = _get_county_state(county_or_state, state)
 
     results = {'results':{
         'county': county,
