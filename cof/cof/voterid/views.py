@@ -22,13 +22,21 @@ def _get_req(field, county, state):
 
 def _get_loc(placetype, county, state):
     """Takes bc_in_person or vid as placetype."""
+    def _get_loc_dict(loc):
+        return [{
+                    'agency': getattr(x, '%s_agency' % placetype),
+                    'loc': getattr(x, '%s_loc' % placetype),
+                    'hours': getattr(x, '%s_hours' % placetype),
+                    'phone': getattr(x, '%s_phone' % placetype),
+                }
+                for x in loc]
     # county places first
     exclude_kwargs = {'%s_loc' % placetype: ''}
     loc = Place.objects.filter(county=county, state=state).exclude(**exclude_kwargs)
-    loc_dict = serializers.serialize('python', loc)
+    loc_dict = _get_loc_dict(loc)
     # statewide places second
     loc = Place.objects.filter(county='', state=state).exclude(**exclude_kwargs)
-    loc_dict += serializers.serialize('python', loc)
+    loc_dict += _get_loc_dict(loc)
     return loc_dict
 
 def api(request, county_or_state=None, state=None):
@@ -49,7 +57,7 @@ def api(request, county_or_state=None, state=None):
         'bc_req': _get_req('bc_req', county, state),
         'bc_mail_inst': _get_req('bc_mail_inst', county, state),
         'bc_online_inst': _get_req('bc_online_inst', county, state),
-        'bc_locations': _get_loc('bc', county, state),
+        'bc_locations': _get_loc('bc_in_person', county, state),
         }
     }
 
